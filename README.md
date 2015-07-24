@@ -38,23 +38,24 @@ This will make gulp log the error and continue normal execution.
 
 ## API
 
-### ejs(options, settings)
+### ejs(data, options)
 
-#### options
+#### data
 Type: `hash`
 Default: `{}`
 
-A hash object where each key corresponds to a variable in your template. Also you can set ejs options in this hash.
+A hash object where each key corresponds to a variable in your template. **DO NOT SET EJS OPTIONS IN THIS HASH**.
 
-For more info on `ejs` options, check the [project's documentation](https://github.com/visionmedia/ejs).
 
-#### settings
+#### options
 Type: `hash`
 Default: `{ext: '.html'}`
 
-A hash object to configure the plugin.
+A hash object to configure the plugin and ejs. **You should set ejs options in this hash**.
 
-##### settings.ext
+For more info on `ejs` options, check the [project's documentation](https://github.com/visionmedia/ejs).
+
+##### options.ext
 Type: `String`
 Default: `.html`
 
