@@ -1,80 +1,81 @@
 /*global describe, it*/
 'use strict';
 
-var fs = require('fs'),
-should = require('should'),
-path = require('path');
+var fs   = require('fs'),
+  should = require('should'),
+  path   = require('path');
+
 require('mocha');
 
 var gutil = require('gulp-util'),
-ejs = require('../');
+    ejs = require('../');
 
 describe('gulp-ejs', function () {
 
-    var expectedFile = new gutil.File({
-        path: 'test/expected/output.html',
-        cwd: 'test/',
-        base: 'test/expected',
-        contents: fs.readFileSync('test/expected/output.html')
+  var expectedFile = new gutil.File({
+    path: 'test/expected/output.html',
+    cwd: 'test/',
+    base: 'test/expected',
+    contents: fs.readFileSync('test/expected/output.html')
+  });
+
+  var expectedFileWithPartial = new gutil.File({
+    path: 'test/expected/outputWithPartial.html',
+    cwd: 'test/',
+    base: 'test/expected',
+    contents: fs.readFileSync('test/expected/outputWithPartial.html')
+  });
+
+  it('should produce correct html output when rendering a file', function (done) {
+
+    var srcFile = new gutil.File({
+      path: 'test/fixtures/ok.ejs',
+      cwd: 'test/',
+      base: 'test/fixtures',
+      contents: fs.readFileSync('test/fixtures/ok.ejs')
     });
 
-    var expectedFileWithPartial = new gutil.File({
-        path: 'test/expected/outputWithPartial.html',
-        cwd: 'test/',
-        base: 'test/expected',
-        contents: fs.readFileSync('test/expected/outputWithPartial.html')
+    var stream = ejs({ title: 'gulp-ejs' });
+
+    stream.on('error', function (err) {
+      should.exist(err);
+      done(err);
     });
 
-    it('should produce correct html output when rendering a file', function (done) {
+    stream.on('data', function (newFile) {
 
-        var srcFile = new gutil.File({
-            path: 'test/fixtures/ok.ejs',
-            cwd: 'test/',
-            base: 'test/fixtures',
-            contents: fs.readFileSync('test/fixtures/ok.ejs')
-        });
+      should.exist(newFile);
+      should.exist(newFile.contents);
 
-        var stream = ejs({ title: 'gulp-ejs' });
-
-        stream.on('error', function (err) {
-            should.exist(err);
-            done(err);
-        });
-
-        stream.on('data', function (newFile) {
-
-            should.exist(newFile);
-            should.exist(newFile.contents);
-
-            String(newFile.contents).should.equal(String(expectedFile.contents));
-            done();
-        });
-
-        stream.write(srcFile);
-        String(path.extname(srcFile.path)).should.equal('.html');
-
-      stream.end();
+      String(newFile.contents).should.equal(String(expectedFile.contents));
+      done();
     });
 
-    it('should throw error when syntax is incorrect', function (done) {
+    stream.write(srcFile);
+    String(path.extname(srcFile.path)).should.equal('.html');
 
-        var srcFile = new gutil.File({
-            path: 'test/fixtures/nok.ejs',
-            cwd: 'test/',
-            base: 'test/fixtures',
-            contents: fs.readFileSync('test/fixtures/nok.ejs')
-        });
+    stream.end();
+  });
 
-        var stream = ejs({ title: 'gulp-ejs' });
+  it('should throw error when syntax is incorrect', function (done) {
 
-        stream.on('error', function (err) {
-            should.exist(err);
-            done();
-        });
-
-        stream.write(srcFile);
-        stream.end();
+    var srcFile = new gutil.File({
+      path: 'test/fixtures/nok.ejs',
+      cwd: 'test/',
+      base: 'test/fixtures',
+      contents: fs.readFileSync('test/fixtures/nok.ejs')
     });
+
+    var stream = ejs({ title: 'gulp-ejs' });
+
+    stream.on('error', function (err) {
+      should.exist(err);
+      done();
+    });
+
+    stream.write(srcFile);
+    stream.end();
+  });
 
   it('should produce correct html output with a specific file extension', function (done) {
 
@@ -148,13 +149,13 @@ describe('gulp-ejs', function () {
     stream.on('data', function (newFile) {
 
       newFile.contents.toString().should.equal(newFile.path);
-      if (newFile.path == 'bar.html') done();
+      if (newFile.path === 'bar.html') done();
     });
 
     stream.write(file1);
     stream.write(file2);
     stream.end();
-  })
+  });
 
   describe('with assets', function () {
     it('should templating with javascripts', function (done) {
@@ -178,7 +179,7 @@ describe('gulp-ejs', function () {
 
         should.exist(newFile);
         should.exist(newFile.contents);
-        path.extname(newFile.path).should.equal('.js')
+        path.extname(newFile.path).should.equal('.js');
 
         String(newFile.contents).should.equal(fs.readFileSync('test/expected/config.js', 'utf8'));
         done();
@@ -197,7 +198,7 @@ describe('gulp-ejs', function () {
       });
 
       var stream = ejs({
-        fonts_path: function () {
+        'fonts_path': function () {
           return '../fonts/fontawesome-webfont.eot?v=4.1.0';
         }
       }, {
@@ -208,7 +209,7 @@ describe('gulp-ejs', function () {
 
         should.exist(newFile);
         should.exist(newFile.contents);
-        path.extname(newFile.path).should.equal('.css')
+        path.extname(newFile.path).should.equal('.css');
 
         String(newFile.contents).should.equal(fs.readFileSync('test/expected/head.css', 'utf8'));
         done();

@@ -4,33 +4,35 @@ var through = require('through2');
 var gutil = require('gulp-util');
 var ejs = require('ejs');
 
-module.exports = function (options, settings) {
-    settings = settings || {};
-    options = options || {};
-    settings.ext = typeof settings.ext === "undefined" ? ".html" : settings.ext;
+//module.exports = function (options, settings) {
+module.exports = function (_data, _options) {
+  var data = _data || {},
+      options = _options || {};
 
-    return through.obj(function (file, enc, cb) {
-        if (file.isNull()) {
-            this.push(file);
-            return cb();
-        }
+  options.ext = typeof options.ext === 'undefined' ? '.html' : options.ext;
 
-        if (file.isStream()) {
-            this.emit(
-                'error',
-                new gutil.PluginError('gulp-ejs', 'Streaming not supported')
-            );
-        }
+  return through.obj(function (file, enc, cb) {
+    if (file.isNull()) {
+      this.push(file);
+      return cb();
+    }
 
-        options.filename = file.path;
-        try {
-            file.contents = new Buffer(ejs.render(file.contents.toString(), options));
-            file.path = gutil.replaceExtension(file.path, settings.ext);
-        } catch (err) {
-            this.emit('error', new gutil.PluginError('gulp-ejs', err.toString()));
-        }
+    if (file.isStream()) {
+      this.emit(
+        'error',
+        new gutil.PluginError('gulp-ejs', 'Streaming not supported')
+      );
+    }
 
-        this.push(file);
-        cb();
-    });
+    data.filename = options.filename = file.path;
+    try {
+      file.contents = new Buffer(ejs.render(file.contents.toString(), data, options));
+      file.path = gutil.replaceExtension(file.path, options.ext);
+    } catch (err) {
+      this.emit('error', new gutil.PluginError('gulp-ejs', err.toString()));
+    }
+
+    this.push(file);
+    cb();
+  });
 };
